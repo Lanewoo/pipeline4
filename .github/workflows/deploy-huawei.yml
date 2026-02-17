@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: swr.cn-east-3.myhuaweicloud.com
+  REGISTRY: swr.tr-istanbul.myhuaweicloud.com
   IMAGE_NAME: pipeline-manager
   IMAGE_TAG: latest
 
