@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline Manager — Huawei</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="mark">H</div>
+      <div class="brand">Huawei <span>Pipeline</span></div>
+    </div>
+    <h1 class="login-title">Welcome back</h1>
+    <p class="login-sub">Sign in to manage your sales pipeline</p>
+
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="switchLoginTab('login')">Sign In</div>
+      <div class="login-tab" onclick="switchLoginTab('apply')">Request Access</div>
+    </div>
+
+    <div id="tab-login">
+      <div id="login-alert" class="alert alert-error"></div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" id="login-user" class="form-input" placeholder="Enter username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="login-pass" class="form-input" placeholder="Enter password" autocomplete="current-password" onkeypress="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
+    </div>
+
+    <div id="tab-apply" style="display:none">
+      <div id="apply-alert" class="alert"></div>
+      <p class="text-muted" style="font-size:13px;margin-bottom:16px">Request a BD/PBD account. An admin will review and approve your application.</p>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" id="apply-name" class="form-input" placeholder="Your full name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Desired Username</label>
+        <input type="text" id="apply-username" class="form-input" placeholder="Choose a username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select id="apply-role" class="form-input">
+          <option value="BD">BD (Business Development)</option>
+          <option value="PBD">PBD (Partner Business Development)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Desired Password</label>
+        <input type="password" id="apply-pass" class="form-input" placeholder="Choose a password">
+      </div>
+      <button class="btn btn-primary" onclick="doApply()">Submit Request</button>
+      <p class="apply-note">Your account will be active once approved by an administrator.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN APP ═══════════════ -->
+<div id="app">
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="mark">H</div>
+      <div class="brand">Huawei <span>Pipeline</span></div>
+    </div>
+    <div class="topbar-divider"></div>
+    <nav class="nav-tabs">
+      <div class="nav-tab active" onclick="goPage('dashboard')" data-page="dashboard"><span class="icon">📊</span> Dashboard</div>
+      <div class="nav-tab" onclick="goPage('pipeline')" data-page="pipeline"><span class="icon">🔄</span> Pipeline</div>
+      <div class="nav-tab" onclick="goPage('records')" data-page="records"><span class="icon">📋</span> Records</div>
+      <div class="nav-tab admin-only" onclick="goPage('users')" data-page="users"><span class="icon">👥</span> Users</div>
+      <div class="nav-tab admin-only" onclick="goPage('import')" data-page="import"><span class="icon">📥</span> Import</div>
+      <div class="nav-tab user-only" onclick="goPage('import')" data-page="import" style="display:none"><span class="icon">📥</span> Import</div>
+      <div class="nav-tab" onclick="goPage('profile')" data-page="profile"><span class="icon">⚙️</span> Profile</div>
+    </nav>
+    <div class="topbar-right">
+      <div class="user-badge" onclick="goPage('profile')">
+        <div class="dot"></div>
+        <span id="topbar-username">—</span>
+        <span class="role-chip" id="topbar-role">—</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- Pages will be included from app.html -->
+  <div id="pages-container"></div>
+</div>
+
+<!-- Modals will be included from modals.html -->
+<div id="modals-container"></div>
+
+<!-- Scripts -->
+<script src="js/app.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/records.js"></script>
+<script src="js/users.js"></script>
+<script src="js/import-export.js"></script>
+
+</body>
+</html>
