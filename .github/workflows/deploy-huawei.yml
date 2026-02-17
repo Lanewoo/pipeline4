@@ -1,0 +1,72 @@
+name: Deploy to Huawei Cloud
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: swr.cn-east-3.myhuaweicloud.com
+  IMAGE_NAME: pipeline-manager
+  IMAGE_TAG: latest
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Huawei SWR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.HUAWEI_CLOUD_USERNAME }}
+          password: ${{ secrets.HUAWEI_CLOUD_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ secrets.HUAWEI_CLOUD_ORGANIZATION }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/${{ secrets.HUAWEI_CLOUD_ORGANIZATION }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to Huawei ECS
+        env:
+          HUAWEI_AK: ${{ secrets.HUAWEI_CLOUD_AK }}
+          HUAWEI_SK: ${{ secrets.HUAWEI_CLOUD_SK }}
+          HUAWEI_PROJECT_ID: ${{ secrets.HUAWEI_CLOUD_PROJECT_ID }}
+          ECS_INSTANCE_ID: ${{ secrets.HUAWEI_ECS_INSTANCE_ID }}
+          IMAGE_URL: ${{ env.REGISTRY }}/${{ secrets.HUAWEI_CLOUD_ORGANIZATION }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        run: |
+          echo "📦 Docker image pushed to Huawei SWR:"
+          echo "   $IMAGE_URL"
+          echo ""
+          echo "✅ Next steps:"
+          echo "   1. Log in to Huawei Cloud Console"
+          echo "   2. Navigate to ECS → Instances"
+          echo "   3. SSH into your instance"
+          echo "   4. Pull and run the latest image:"
+          echo "      docker pull $IMAGE_URL"
+          echo "      docker run -d -p 5000:5000 \\"
+          echo "        -e NODE_ENV=production \\"
+          echo "        -e JWT_SECRET=your_secret \\"
+          echo "        --name pipeline-manager \\"
+          echo "        $IMAGE_URL"
