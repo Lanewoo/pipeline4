@@ -15,11 +15,11 @@ function populateFilters() {
   fill('f-industry', recs.map(r => r.industry));
   fill('f-offering', recs.map(r => r.offering));
   fill('f-bd', recs.map(r => r.bd));
-  
+
   const setDL = (id, vals) => { document.getElementById(id).innerHTML = [...new Set(vals.filter(Boolean))].map(v => `<option value="${v}">`).join(''); };
   setDL('industry-list', recs.map(r => r.industry));
   setDL('offering-list', recs.map(r => r.offering));
-  const users = JSON.parse(localStorage.getItem('pm_users') || '[]');
+  const users = getUsers();
   setDL('bd-list', users.filter(u => u.role==='BD'||u.role==='admin').map(u => u.name));
   setDL('pbd-list', users.filter(u => u.role==='PBD'||u.role==='admin').map(u => u.name));
 }
@@ -31,7 +31,7 @@ function renderRecords() {
   const fInd = document.getElementById('f-industry')?.value||'';
   const fOf = document.getElementById('f-offering')?.value||'';
   const fBd = document.getElementById('f-bd')?.value||'';
-  
+
   if (q) recs = recs.filter(r => JSON.stringify(r).toLowerCase().includes(q));
   if (fStage) recs = recs.filter(r => r.stage === fStage);
   if (fInd) recs = recs.filter(r => r.industry === fInd);
@@ -45,7 +45,7 @@ function renderRecords() {
     document.getElementById('records-body').innerHTML = `<tr><td colspan="${cols.length}"><div class="empty-state"><div class="empty-icon">📭</div><div>No records found</div></div></td></tr>`;
     return;
   }
-  
+
   document.getElementById('records-body').innerHTML = recs.map(r => `
     <tr>
       <td>${r.partner||'—'}</td>
@@ -93,8 +93,7 @@ function openAddRecord() {
 }
 
 function editRecord(id) {
-  const recs = getRecords();
-  const r = recs.find(x => x.id === id);
+  const r = getRecords().find(x => x.id === id);
   if (!r) return;
   editingRecordId = id;
   document.getElementById('modal-record-title').textContent = 'Edit Record';
@@ -108,12 +107,12 @@ function editRecord(id) {
   openModal('modal-record');
 }
 
-function saveRecord() {
+async function saveRecord() {
   const partner = document.getElementById('r-partner').value.trim();
   const customers = document.getElementById('r-customers').value.trim();
   const stage = document.getElementById('r-stage').value;
   if (!partner || !customers) { showAlert('record-alert','error','Partner and Customers are required.'); return; }
-  
+
   const r = {
     partner, customers,
     hwchid: document.getElementById('r-hwchid').value.trim(),
@@ -132,37 +131,42 @@ function saveRecord() {
   };
   MONTHS.forEach(m => r[m] = Number(document.getElementById('r-'+m).value)||0);
 
-  let recs = getRecords();
-  if (editingRecordId) {
-    const idx = recs.findIndex(x => x.id === editingRecordId);
-    if (idx >= 0) { recs[idx] = { ...recs[idx], ...r }; }
-  } else {
-    r.id = Math.max(...recs.map(x => x.id), 0) + 1;
-    r.created = new Date().toISOString();
-    recs.push(r);
+  try {
+    if (editingRecordId) {
+      await api('PUT', '/records/' + editingRecordId, r);
+    } else {
+      await api('POST', '/records', r);
+    }
+    await refreshRecords();
+    closeModal('modal-record');
+    renderRecords();
+    renderDashboard();
+  } catch (err) {
+    showAlert('record-alert', 'error', err.message || 'Failed to save record.');
   }
-  saveRecords(recs);
-  closeModal('modal-record');
-  renderRecords();
-  renderDashboard();
 }
 
-function deleteRecord(id) {
+async function deleteRecord(id) {
   if (!confirm('Delete this record?')) return;
-  saveRecords(getRecords().filter(r => r.id !== id));
-  renderRecords();
-  renderDashboard();
+  try {
+    await api('DELETE', '/records/' + id);
+    await refreshRecords();
+    renderRecords();
+    renderDashboard();
+  } catch (err) {
+    alert('Failed to delete: ' + (err.message || 'Unknown error'));
+  }
 }
 
 function viewRecord(id) {
   const r = getRecords().find(x => x.id === id);
   if (!r) return;
   document.getElementById('view-title').textContent = r.customers || r.partner;
-  
+
   const monthsHtml = `<div class="month-grid" style="margin-top:8px">
     ${MONTHS.map((m,i) => `<div class="form-group"><div class="info-item"><div class="lbl">${MONTH_LABELS[i]}</div><div class="val text-mono">${fmtMoney(r[m]||0)}</div></div></div>`).join('')}
   </div>`;
-  
+
   document.getElementById('view-body').innerHTML = `
     <div class="info-row">
       <div class="info-item"><div class="lbl">Partner</div><div class="val">${r.partner||'—'}</div></div>
@@ -189,7 +193,7 @@ function viewRecord(id) {
     <div style="font-family:var(--font-head);font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text-muted)">Monthly Forecast</div>
     ${monthsHtml}
   `;
-  
+
   document.getElementById('view-footer').innerHTML = `
     ${canEditRecord(r) ? `<button class="btn btn-secondary btn-sm" onclick="closeModal('modal-view');editRecord(${r.id})">Edit</button>` : ''}
     ${currentUser?.role==='admin' ? `<button class="btn btn-danger btn-sm" onclick="closeModal('modal-view');deleteRecord(${r.id})">Delete</button>` : ''}

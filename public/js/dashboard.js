@@ -17,7 +17,6 @@ function renderDashboard() {
     <div class="stat-card purple"><div class="stat-label">In Negotiation</div><div class="stat-value">${recs.filter(r=>r.stage==='Negotiation').length}</div><div class="stat-sub">Near close</div></div>
   `;
 
-  // Monthly chart
   const monthTotals = MONTHS.map(m => recs.reduce((s,r) => s + (Number(r[m])||0), 0));
   const maxM = Math.max(...monthTotals, 1);
   document.getElementById('month-chart').innerHTML = monthTotals.map((v, i) => `
@@ -28,7 +27,6 @@ function renderDashboard() {
     </div>
   `).join('');
 
-  // Donut
   const stages = ['Prospect','Qualification','Proposal','Negotiation','Closed Won','Closed Lost'];
   const stageCols = ['#6b7280','#3b82f6','#f59e0b','#8b5cf6','#10b981','#ef4444'];
   const stageCounts = stages.map(s => recs.filter(r => r.stage === s).length);
@@ -87,14 +85,5 @@ function getVisibleRecords() {
   const recs = getRecords();
   if (!currentUser) return recs;
   if (currentUser.role === 'admin') return recs;
-  // BD/PBD only see their own records
   return recs.filter(r => r.bd === currentUser.name || r.pbd === currentUser.name || r.bd === currentUser.username || r.pbd === currentUser.username);
-}
-
-function getRecords() {
-  return JSON.parse(localStorage.getItem('pm_records') || '[]');
-}
-
-function saveRecords(r) {
-  localStorage.setItem('pm_records', JSON.stringify(r));
 }

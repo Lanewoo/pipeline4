@@ -3,14 +3,13 @@
 /* ═══════════════════════════════════════════════════════════════ */
 
 function renderUsers() {
-  const users = JSON.parse(localStorage.getItem('pm_users') || '[]');
-  const pending = JSON.parse(localStorage.getItem('pm_pending') || '[]');
+  const users = getUsers();
+  const pending = getPending();
 
   const countEl = document.getElementById('pending-count-badge');
   if (pending.length > 0) countEl.innerHTML = `<span class="badge badge-amber" style="margin-left:6px">${pending.length}</span>`;
   else countEl.innerHTML = '';
 
-  // Pending list
   document.getElementById('pending-list').innerHTML = pending.length ? pending.map(p => `
     <div class="pending-card">
       <div style="width:40px;height:40px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:white;flex-shrink:0">${(p.name||'?')[0].toUpperCase()}</div>
@@ -25,7 +24,6 @@ function renderUsers() {
     </div>
   `).join('') : '<div class="empty-state"><div class="empty-icon">✅</div><div>No pending requests</div></div>';
 
-  // All users
   document.getElementById('users-body').innerHTML = users.map(u => `
     <tr>
       <td>@${u.username}</td>
@@ -44,34 +42,36 @@ function renderUsers() {
   `).join('') || '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No users</td></tr>';
 }
 
-function approveUser(id) {
-  const pending = JSON.parse(localStorage.getItem('pm_pending') || '[]');
-  const idx = pending.findIndex(p => p.id === id);
-  if (idx < 0) return;
-  
-  const p = pending[idx];
-  const users = JSON.parse(localStorage.getItem('pm_users') || '[]');
-  users.push({ id: p.id, username: p.username, name: p.name, role: p.role, password: p.password, status: 'active', created: new Date().toISOString() });
-  
-  localStorage.setItem('pm_users', JSON.stringify(users));
-  pending.splice(idx, 1);
-  localStorage.setItem('pm_pending', JSON.stringify(pending));
-  renderUsers();
+async function approveUser(id) {
+  try {
+    await api('POST', '/users/pending/' + id + '/approve');
+    await refreshUsers();
+    await refreshPending();
+    renderUsers();
+  } catch (err) {
+    alert('Failed to approve: ' + (err.message || 'Unknown error'));
+  }
 }
 
-function rejectUser(id) {
+async function rejectUser(id) {
   if (!confirm('Reject this request?')) return;
-  const pending = JSON.parse(localStorage.getItem('pm_pending') || '[]');
-  localStorage.setItem('pm_pending', JSON.stringify(pending.filter(p => p.id !== id)));
-  renderUsers();
+  try {
+    await api('POST', '/users/pending/' + id + '/reject');
+    await refreshPending();
+    renderUsers();
+  } catch (err) {
+    alert('Failed to reject: ' + (err.message || 'Unknown error'));
+  }
 }
 
-function toggleUserStatus(id, status) {
-  const users = JSON.parse(localStorage.getItem('pm_users') || '[]');
-  const u = users.find(x => x.id === id);
-  if (u) u.status = status;
-  localStorage.setItem('pm_users', JSON.stringify(users));
-  renderUsers();
+async function toggleUserStatus(id, status) {
+  try {
+    await api('PUT', '/users/' + id, { status });
+    await refreshUsers();
+    renderUsers();
+  } catch (err) {
+    alert('Failed to update status: ' + (err.message || 'Unknown error'));
+  }
 }
 
 function openAddUser() {
@@ -81,20 +81,21 @@ function openAddUser() {
   openModal('modal-user');
 }
 
-function saveUser() {
+async function saveUser() {
   const name = document.getElementById('u-name').value.trim();
   const username = document.getElementById('u-username').value.trim();
   const role = document.getElementById('u-role').value;
-  const pass = document.getElementById('u-pass').value;
-  if (!name || !username || !pass) { showAlert('user-alert','error','All fields are required.'); return; }
-  
-  const users = JSON.parse(localStorage.getItem('pm_users') || '[]');
-  if (users.find(u => u.username === username)) { showAlert('user-alert','error','Username already exists.'); return; }
-  
-  users.push({ id: Math.max(...users.map(u => u.id), 0) + 1, username, name, role, password: pass, status: 'active', created: new Date().toISOString() });
-  localStorage.setItem('pm_users', JSON.stringify(users));
-  closeModal('modal-user');
-  renderUsers();
+  const password = document.getElementById('u-pass').value;
+  if (!name || !username || !password) { showAlert('user-alert','error','All fields are required.'); return; }
+
+  try {
+    await api('POST', '/users', { name, username, role, password });
+    await refreshUsers();
+    closeModal('modal-user');
+    renderUsers();
+  } catch (err) {
+    showAlert('user-alert', 'error', err.message || 'Failed to create user.');
+  }
 }
 
 let resetPwTargetId = null;
@@ -106,19 +107,18 @@ function openResetPw(id, username) {
   openModal('modal-reset-pw');
 }
 
-function confirmResetPw() {
+async function confirmResetPw() {
   const np = document.getElementById('rpw-new').value;
   const cp = document.getElementById('rpw-confirm').value;
   if (!np) { showAlert('reset-pw-alert','error','Enter a new password.'); return; }
   if (np !== cp) { showAlert('reset-pw-alert','error','Passwords do not match.'); return; }
-  
-  const users = JSON.parse(localStorage.getItem('pm_users') || '[]');
-  const u = users.find(x => x.id === resetPwTargetId);
-  if (u) { 
-    u.password = np; 
-    localStorage.setItem('pm_users', JSON.stringify(users));
+
+  try {
+    await api('PUT', '/users/' + resetPwTargetId + '/password', { password: np });
+    closeModal('modal-reset-pw');
+  } catch (err) {
+    showAlert('reset-pw-alert', 'error', err.message || 'Failed to reset password.');
   }
-  closeModal('modal-reset-pw');
 }
 
 function populateProfile() {
@@ -131,24 +131,20 @@ function populateProfile() {
   document.getElementById('profile-username').textContent = '@' + currentUser.username;
 }
 
-function changePassword() {
+async function changePassword() {
   const cur = document.getElementById('pw-current').value;
   const nw = document.getElementById('pw-new').value;
   const cf = document.getElementById('pw-confirm').value;
   if (!cur || !nw || !cf) { showAlert('pw-alert','error','All fields are required.'); return; }
   if (nw !== cf) { showAlert('pw-alert','error','New passwords do not match.'); return; }
-  
-  const users = JSON.parse(localStorage.getItem('pm_users') || '[]');
-  const u = users.find(x => x.id === currentUser.id);
-  if (!u || u.password !== cur) { showAlert('pw-alert','error','Current password is incorrect.'); return; }
-  
-  u.password = nw;
-  localStorage.setItem('pm_users', JSON.stringify(users));
-  currentUser.password = nw;
-  sessionStorage.setItem('pm_session', JSON.stringify(currentUser));
-  
-  showAlert('pw-alert','success','Password updated successfully.');
-  document.getElementById('pw-current').value = '';
-  document.getElementById('pw-new').value = '';
-  document.getElementById('pw-confirm').value = '';
+
+  try {
+    await api('PUT', '/users/' + currentUser.id + '/password', { password: nw, currentPassword: cur });
+    showAlert('pw-alert','success','Password updated successfully.');
+    document.getElementById('pw-current').value = '';
+    document.getElementById('pw-new').value = '';
+    document.getElementById('pw-confirm').value = '';
+  } catch (err) {
+    showAlert('pw-alert', 'error', err.message || 'Failed to update password.');
+  }
 }

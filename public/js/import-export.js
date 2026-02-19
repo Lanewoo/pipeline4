@@ -27,11 +27,10 @@ function processFile(file) {
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
     if (!rows.length) { alert('Empty file.'); return; }
-    
+
     const headers = rows[0].map(h => String(h||'').trim());
     const dataRows = rows.slice(1).filter(r => r.some(c => c !== null && c !== undefined && c !== ''));
 
-    // Match columns
     const matched = {}, missing = [];
     REQUIRED_COLS.forEach(rc => {
       const found = headers.find(h => h.toLowerCase() === rc.toLowerCase() || h.toLowerCase().replace(/\s+/g,'') === rc.toLowerCase().replace(/\s+/g,''));
@@ -62,14 +61,13 @@ function processFile(file) {
   reader.readAsArrayBuffer(file);
 }
 
-function confirmImport() {
+async function confirmImport() {
   if (!importData) return;
   const { matched, dataRows } = importData;
-  const recs = getRecords();
   let added = 0;
-  
-  dataRows.forEach(row => {
-    const r = { id: Math.max(...recs.map(x => x.id), 0) + 1, created: new Date().toISOString() };
+
+  for (const row of dataRows) {
+    const r = {};
     REQUIRED_COLS.forEach(rc => {
       const idx = matched[rc];
       const key = COL_MAP[rc];
@@ -80,13 +78,18 @@ function confirmImport() {
         r[key] = v;
       }
     });
-    if (r.partner || r.customers) { recs.push(r); added++; }
-  });
-  
-  saveRecords(recs);
+    if (r.partner || r.customers) {
+      try {
+        await api('POST', '/records', r);
+        added++;
+      } catch { /* skip failed rows */ }
+    }
+  }
+
+  await refreshRecords();
   importData = null;
   document.getElementById('import-preview').style.display = 'none';
-  alert(`✅ Successfully imported ${added} record(s).`);
+  alert(`Successfully imported ${added} record(s).`);
   goPage('records');
 }
 

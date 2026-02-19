@@ -89,6 +89,38 @@ router.post('/pending/:id/approve', async (req, res, next) => {
   }
 });
 
+// Reset user password (admin)
+router.put('/:id/password', async (req, res, next) => {
+  try {
+    const user = await db.getUser(parseInt(req.params.id), true);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+    const { password, currentPassword } = req.body;
+    if (!password) {
+      return res.status(400).json({ success: false, error: 'New password required' });
+    }
+    if (currentPassword && user.password !== currentPassword) {
+      return res.status(400).json({ success: false, error: 'Current password is incorrect' });
+    }
+    user.password = password;
+    await db.updateUser(user);
+    res.json({ success: true, message: 'Password updated' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Delete user (admin)
+router.delete('/:id', async (req, res, next) => {
+  try {
+    await db.deleteUser(parseInt(req.params.id));
+    res.json({ success: true, message: 'User deleted' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Reject pending request
 router.post('/pending/:id/reject', async (req, res, next) => {
   try {

@@ -5,16 +5,50 @@
 let currentUser = null;
 const API_BASE = '/api';
 
+// In-memory cache refreshed from the API
+let _cachedRecords = [];
+let _cachedUsers = [];
+let _cachedPending = [];
+
+// ═══════════════════════════════════════════════════════
+//  API HELPERS
+// ═══════════════════════════════════════════════════════
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API_BASE + path, opts);
+  const data = await res.json();
+  if (!res.ok || !data.success) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+async function refreshRecords() {
+  const data = await api('GET', '/records');
+  _cachedRecords = data.records || [];
+}
+
+async function refreshUsers() {
+  const data = await api('GET', '/users');
+  _cachedUsers = data.users || [];
+}
+
+async function refreshPending() {
+  const data = await api('GET', '/users/pending');
+  _cachedPending = data.pending || [];
+}
+
+function getRecords() { return _cachedRecords; }
+function getUsers() { return _cachedUsers; }
+function getPending() { return _cachedPending; }
+
 // ═══════════════════════════════════════════════════════
 //  INITIALIZATION
 // ═══════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Load HTML structure
   await loadPages();
   await loadModals();
-  
-  // Check session
   checkSession();
 });
 
@@ -317,91 +351,94 @@ async function loadModals() {
 //  AUTH
 // ═══════════════════════════════════════════════════════
 
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
   if (!u || !p) { showAlert('login-alert', 'error', 'Please enter username and password.'); return; }
-  
-  // For now, use localStorage-based auth
-  const users = JSON.parse(localStorage.getItem('pm_users') || '[]');
-  const user = users.find(x => x.username === u && x.password === p && x.status === 'active');
-  
-  if (!user) { showAlert('login-alert', 'error', 'Invalid credentials or account inactive.'); return; }
-  
-  currentUser = user;
-  sessionStorage.setItem('pm_session', JSON.stringify(user));
-  launchApp();
+
+  try {
+    const data = await api('POST', '/auth/login', { username: u, password: p });
+    currentUser = data.user;
+    sessionStorage.setItem('pm_session', JSON.stringify(currentUser));
+    await launchApp();
+  } catch (err) {
+    showAlert('login-alert', 'error', err.message || 'Invalid credentials or account inactive.');
+  }
 }
 
-function doApply() {
+async function doApply() {
   const name = document.getElementById('apply-name').value.trim();
   const username = document.getElementById('apply-username').value.trim();
   const role = document.getElementById('apply-role').value;
   const pass = document.getElementById('apply-pass').value;
   if (!name || !username || !pass) { showAlert('apply-alert', 'error', 'All fields are required.'); return; }
-  
-  const users = JSON.parse(localStorage.getItem('pm_users') || '[]');
-  const pending = JSON.parse(localStorage.getItem('pm_pending') || '[]');
-  
-  if (users.find(x => x.username === username) || pending.find(x => x.username === username)) {
-    showAlert('apply-alert', 'error', 'Username already exists or is pending.'); return;
+
+  try {
+    await api('POST', '/auth/register', { name, username, role, password: pass });
+    showAlert('apply-alert', 'success', 'Request submitted! An admin will review your application.');
+    document.getElementById('apply-name').value = '';
+    document.getElementById('apply-username').value = '';
+    document.getElementById('apply-pass').value = '';
+  } catch (err) {
+    showAlert('apply-alert', 'error', err.message || 'Registration failed.');
   }
-  
-  pending.push({ id: Date.now(), username, name, role, password: pass, requested: new Date().toISOString() });
-  localStorage.setItem('pm_pending', JSON.stringify(pending));
-  
-  showAlert('apply-alert', 'success', 'Request submitted! An admin will review your application.');
-  document.getElementById('apply-name').value = '';
-  document.getElementById('apply-username').value = '';
-  document.getElementById('apply-pass').value = '';
 }
 
 function doLogout() {
   currentUser = null;
   sessionStorage.removeItem('pm_session');
+  _cachedRecords = [];
+  _cachedUsers = [];
+  _cachedPending = [];
   document.getElementById('app').classList.remove('visible');
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-user').value = '';
   document.getElementById('login-pass').value = '';
 }
 
-function launchApp() {
+async function launchApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
   document.getElementById('topbar-username').textContent = currentUser.name || currentUser.username;
   const rb = document.getElementById('topbar-role');
   rb.textContent = currentUser.role;
   rb.className = 'role-chip ' + currentUser.role;
-  // Show/hide admin tabs
   document.querySelectorAll('.admin-only').forEach(el => {
     el.style.display = currentUser.role === 'admin' ? 'flex' : 'none';
   });
   document.querySelectorAll('.user-only').forEach(el => {
     el.style.display = currentUser.role !== 'admin' ? 'flex' : 'none';
   });
+
+  await refreshRecords();
   populateProfile();
   goPage('dashboard');
 }
 
-function checkSession() {
+async function checkSession() {
   const s = sessionStorage.getItem('pm_session');
-  if (s) { try { currentUser = JSON.parse(s); launchApp(); } catch {} }
+  if (s) {
+    try {
+      currentUser = JSON.parse(s);
+      await launchApp();
+    } catch { /* session invalid */ }
+  }
 }
 
 // ═══════════════════════════════════════════════════════
 //  NAVIGATION & UI
 // ═══════════════════════════════════════════════════════
 
-function goPage(name) {
+async function goPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.querySelectorAll(`.nav-tab[data-page="${name}"]`).forEach(t => t.classList.add('active'));
-  
+
   if (name === 'dashboard') renderDashboard();
   if (name === 'pipeline') renderPipeline();
   if (name === 'records') { populateFilters(); renderRecords(); }
-  if (name === 'users') renderUsers();
+  if (name === 'users') { await refreshUsers(); await refreshPending(); renderUsers(); }
   if (name === 'profile') populateProfile();
 }
 
@@ -465,21 +502,3 @@ function stageBadge(stage) {
 const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function recordTotal(r) { return MONTHS.reduce((s,m) => s + (Number(r[m])||0), 0); }
-
-// Initialize default data
-function initializeDefaultData() {
-  if (!localStorage.getItem('pm_users')) {
-    localStorage.setItem('pm_users', JSON.stringify([
-      { id: 1, username: 'admin', name: 'Administrator', role: 'admin', password: 'huawei@123', status: 'active', created: new Date().toISOString() }
-    ]));
-  }
-  if (!localStorage.getItem('pm_records')) {
-    const demoRecords = [
-      { id:1, partner:'TechCorp', customers:'Acme Ltd', hwchid:'HWC001', billing:'2025-01-15', reseller:'ResellerA', industry:'Finance', workload:'Cloud Compute', offering:'ECS', bd:'Alice Wong', pbd:'Bob Chen', psa:'Charlie Lee', partnersales:'Dana Park', nextstep:'Follow up Q2', prob:75, stage:'Proposal', jan:50000, feb:60000, mar:70000, apr:80000, may:85000, jun:90000, jul:95000, aug:100000, sep:110000, oct:120000, nov:130000, dec:140000, created:new Date().toISOString() },
-      { id:2, partner:'GlobalNet', customers:'BetaCo', hwchid:'HID002', billing:'2025-02-01', reseller:'ResellerB', industry:'Retail', workload:'Storage', offering:'OBS', bd:'Eve Tan', pbd:'Frank Li', psa:'Grace Kim', partnersales:'Henry Wu', nextstep:'Demo scheduled', prob:50, stage:'Qualification', jan:20000, feb:22000, mar:25000, apr:28000, may:30000, jun:32000, jul:35000, aug:38000, sep:40000, oct:45000, nov:50000, dec:55000, created:new Date().toISOString() }
-    ];
-    localStorage.setItem('pm_records', JSON.stringify(demoRecords));
-  }
-}
-
-initializeDefaultData();
