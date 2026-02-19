@@ -2,62 +2,78 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// Get all records (with visibility filtering)
-router.get('/', (req, res) => {
-  const records = db.getRecords();
-  res.json({ success: true, records });
+// Get all records
+router.get('/', async (req, res, next) => {
+  try {
+    const records = await db.getRecords();
+    res.json({ success: true, records });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Get single record
-router.get('/:id', (req, res) => {
-  const record = db.getRecord(parseInt(req.params.id));
-  if (!record) {
-    return res.status(404).json({ success: false, error: 'Record not found' });
+router.get('/:id', async (req, res, next) => {
+  try {
+    const record = await db.getRecord(parseInt(req.params.id));
+    if (!record) {
+      return res.status(404).json({ success: false, error: 'Record not found' });
+    }
+    res.json({ success: true, record });
+  } catch (err) {
+    next(err);
   }
-  res.json({ success: true, record });
 });
 
 // Create record
-router.post('/', (req, res) => {
-  const record = {
-    id: db.getNextRecordId(),
-    ...req.body,
-    created: new Date().toISOString()
-  };
+router.post('/', async (req, res, next) => {
+  try {
+    const data = req.body;
 
-  if (!record.partner || !record.customers) {
-    return res.status(400).json({ success: false, error: 'Partner and Customers required' });
+    if (!data.partner || !data.customers) {
+      return res.status(400).json({ success: false, error: 'Partner and Customers required' });
+    }
+
+    const record = await db.saveRecord(data);
+    res.json({ success: true, record });
+  } catch (err) {
+    next(err);
   }
-
-  db.saveRecord(record);
-  res.json({ success: true, record });
 });
 
 // Update record
-router.put('/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const existing = db.getRecord(id);
-  
-  if (!existing) {
-    return res.status(404).json({ success: false, error: 'Record not found' });
-  }
+router.put('/:id', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    const existing = await db.getRecord(id);
 
-  const updated = { ...existing, ...req.body, id };
-  db.updateRecord(updated);
-  res.json({ success: true, record: updated });
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'Record not found' });
+    }
+
+    const updated = { ...existing, ...req.body, id };
+    const record = await db.updateRecord(updated);
+    res.json({ success: true, record });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Delete record
-router.delete('/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const record = db.getRecord(id);
-  
-  if (!record) {
-    return res.status(404).json({ success: false, error: 'Record not found' });
-  }
+router.delete('/:id', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    const record = await db.getRecord(id);
 
-  db.deleteRecord(id);
-  res.json({ success: true, message: 'Record deleted' });
+    if (!record) {
+      return res.status(404).json({ success: false, error: 'Record not found' });
+    }
+
+    await db.deleteRecord(id);
+    res.json({ success: true, message: 'Record deleted' });
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;

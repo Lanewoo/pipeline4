@@ -4,6 +4,8 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const db = require('./db');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -39,16 +41,32 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({
     success: false,
-    error: process.env.NODE_ENV === 'production' 
-      ? 'Internal Server Error' 
+    error: process.env.NODE_ENV === 'production'
+      ? 'Internal Server Error'
       : err.message
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Pipeline Manager is running on http://localhost:${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+// Initialize database then start server
+(async () => {
+  try {
+    await db.init();
+    app.listen(PORT, () => {
+      console.log(`🚀 Pipeline Manager is running on http://localhost:${PORT}`);
+      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🗄️  Database: Huawei Cloud RDS (PostgreSQL)`);
+    });
+  } catch (err) {
+    console.error('❌ Failed to initialize database:', err.message);
+    process.exit(1);
+  }
+})();
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('Shutting down...');
+  await db.close();
+  process.exit(0);
 });
 
 module.exports = app;
