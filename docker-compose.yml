@@ -1,23 +1,25 @@
+# Docker Compose 服务配置
 services:
   app:
-    build: .
+    build: .                               # 使用当前目录的 Dockerfile 构建镜像
     ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      CORS_ORIGIN: ${CORS_ORIGIN:-*}
-      DATABASE_URL: postgresql://root:husa%40123@192.168.2.127:5432/pipeline_manager
-      DB_SSL: "false"
-      DB_POOL_MAX: ${DB_POOL_MAX:-10}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-    volumes:
-      - ./server:/app/server
-      - ./public:/app/public
-    restart: unless-stopped
-    healthcheck:
+      - "3000:3000"                        # 将容器的 3000 端口映射到主机的 3000 端口
+    environment:                           # 环境变量配置
+      NODE_ENV: production                 # 运行环境：生产模式
+      PORT: 3000                           # 服务端口
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}       # CORS 允许的来源（默认允许所有）
+      DATABASE_URL: postgresql://root:husa%40123@192.168.2.127:5432/pipeline_manager  # PostgreSQL 数据库连接地址
+      DB_SSL: "false"                      # 不启用 SSL（同 VPC 内不需要）
+      DB_POOL_MAX: ${DB_POOL_MAX:-10}      # 连接池最大连接数（默认 10）
+      LOG_LEVEL: ${LOG_LEVEL:-info}        # 日志级别（默认 info）
+    volumes:                               # 数据卷挂载（开发时方便修改代码无需重新构建）
+      - ./server:/app/server               # 挂载服务端代码
+      - ./public:/app/public               # 挂载前端静态文件
+    restart: unless-stopped                # 重启策略：除非手动停止，否则自动重启
+    healthcheck:                           # 健康检查配置
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', r => { if(r.statusCode!==200) throw r.statusCode })"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      # 检查命令：发送 HTTP 请求到 3000 端口，非 200 状态码视为不健康
+      interval: 30s                        # 检查间隔：30 秒
+      timeout: 10s                         # 超时时间：10 秒
+      retries: 3                           # 最大重试次数：3 次
+      start_period: 40s                    # 启动等待时间：40 秒（容器启动后的宽限期）

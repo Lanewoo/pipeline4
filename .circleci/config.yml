@@ -1,43 +1,49 @@
+# CircleCI 配置文件版本
 version: 2.1
 
+# 使用 CircleCI 官方 Node.js Orb（预构建的任务模板）
 orbs:
   node: circleci/node@5.0.0
 
+# 任务定义
 jobs:
+  # 构建任务：安装依赖、代码检查、运行测试
   build:
-    executor: node/default
+    executor: node/default                 # 使用 Node.js 默认执行器
     steps:
-      - checkout
-      - node/install-packages:
-          npm-version: 8.0.0
+      - checkout                           # 检出仓库代码
+      - node/install-packages:             # 安装 npm 依赖
+          npm-version: 8.0.0               # 指定 npm 版本
       - run:
-          name: Lint code
-          command: npm run lint --if-present
+          name: Lint code                  # 代码风格检查
+          command: npm run lint --if-present  # 如果有 lint 脚本则执行
       - run:
-          name: Run tests
-          command: npm test --if-present
+          name: Run tests                  # 运行单元测试
+          command: npm test --if-present   # 如果有 test 脚本则执行
 
+  # 部署任务：构建应用并部署到服务器
   deploy:
-    executor: node/default
+    executor: node/default                 # 使用 Node.js 默认执行器
     steps:
-      - checkout
-      - node/install-packages
+      - checkout                           # 检出仓库代码
+      - node/install-packages              # 安装 npm 依赖
       - run:
-          name: Build application
-          command: npm run build --if-present
+          name: Build application          # 构建应用
+          command: npm run build --if-present  # 如果有 build 脚本则执行
       - run:
-          name: Deploy to server
+          name: Deploy to server           # 部署到服务器
           command: |
-            # Add your deployment commands here
+            # 在此添加你的部署命令
             echo "Deploying to production..."
 
+# 工作流定义：编排任务执行顺序
 workflows:
-  build-and-deploy:
+  build-and-deploy:                        # 工作流名称：构建并部署
     jobs:
-      - build
-      - deploy:
+      - build                              # 先执行构建任务
+      - deploy:                            # 然后执行部署任务
           requires:
-            - build
+            - build                        # 部署依赖构建任务成功完成
           filters:
             branches:
-              only: main
+              only: main                   # 仅在 main 分支上触发部署

@@ -79,10 +79,10 @@ Use the provided Docker configuration or deploy Node.js directly.
 
 ```
 Username: admin
-Password: huawei@123
+Password: (set via DEFAULT_ADMIN_PASSWORD in .env)
 ```
 
-⚠️ **IMPORTANT**: Change the default password immediately in production!
+⚠️ **IMPORTANT**: Set a strong `DEFAULT_ADMIN_PASSWORD` in `.env` before first run!
 
 ## User Roles
 

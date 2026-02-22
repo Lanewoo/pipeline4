@@ -1,110 +1,170 @@
 <!DOCTYPE html>
+<!-- 文档类型声明：HTML5 -->
 <html lang="en">
+<!-- HTML 根元素，设置语言为英文 -->
 <head>
   <meta charset="UTF-8">
+  <!-- 设置字符编码为 UTF-8 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 设置视口宽度为设备宽度，初始缩放比例 1.0（适配移动端） -->
   <title>Pipeline Manager — Huawei</title>
+  <!-- 页面标题 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- 引入 XLSX 库（用于 Excel 文件的导入导出） -->
   <link rel="stylesheet" href="css/styles.css">
+  <!-- 引入自定义样式表 -->
 </head>
 <body>
 
-<!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+<!-- ═══════════════ 登录界面 ═══════════════ -->
 <div id="login-screen">
+  <!-- 登录界面容器（全屏覆盖） -->
   <div class="login-card">
+    <!-- 登录卡片 -->
     <div class="login-logo">
+      <!-- Logo 区域 -->
       <div class="mark">H</div>
+      <!-- Logo 图标：H 字母 -->
       <div class="brand">Huawei <span>Pipeline</span></div>
+      <!-- 品牌名称 -->
     </div>
     <h1 class="login-title">Welcome back</h1>
+    <!-- 欢迎标题 -->
     <p class="login-sub">Sign in to manage your sales pipeline</p>
+    <!-- 副标题：提示登录管理销售管道 -->
 
     <div class="login-tabs">
+      <!-- 登录/注册 切换标签 -->
       <div class="login-tab active" onclick="switchLoginTab('login')">Sign In</div>
+      <!-- "登录"标签（默认激活） -->
       <div class="login-tab" onclick="switchLoginTab('apply')">Request Access</div>
+      <!-- "申请访问"标签 -->
     </div>
 
+    <!-- 登录表单 -->
     <div id="tab-login">
       <div id="login-alert" class="alert alert-error"></div>
+      <!-- 登录错误提示区域（默认隐藏） -->
       <div class="form-group">
         <label class="form-label">Username</label>
+        <!-- 用户名标签 -->
         <input type="text" id="login-user" class="form-input" placeholder="Enter username" autocomplete="username">
+        <!-- 用户名输入框 -->
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
+        <!-- 密码标签 -->
         <input type="password" id="login-pass" class="form-input" placeholder="Enter password" autocomplete="current-password" onkeypress="if(event.key==='Enter')doLogin()">
+        <!-- 密码输入框，按 Enter 键触发登录 -->
       </div>
       <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
+      <!-- 登录按钮 -->
     </div>
 
+    <!-- 申请访问表单（默认隐藏） -->
     <div id="tab-apply" style="display:none">
       <div id="apply-alert" class="alert"></div>
+      <!-- 申请提示区域 -->
       <p class="text-muted" style="font-size:13px;margin-bottom:16px">Request a BD/PBD account. An admin will review and approve your application.</p>
+      <!-- 提示文字：申请 BD/PBD 账号，管理员审核 -->
       <div class="form-group">
         <label class="form-label">Full Name</label>
+        <!-- 全名标签 -->
         <input type="text" id="apply-name" class="form-input" placeholder="Your full name">
+        <!-- 全名输入框 -->
       </div>
       <div class="form-group">
         <label class="form-label">Desired Username</label>
+        <!-- 期望用户名标签 -->
         <input type="text" id="apply-username" class="form-input" placeholder="Choose a username">
+        <!-- 用户名输入框 -->
       </div>
       <div class="form-group">
         <label class="form-label">Role</label>
+        <!-- 角色标签 -->
         <select id="apply-role" class="form-input">
           <option value="BD">BD (Business Development)</option>
+          <!-- 选项：BD（商务拓展） -->
           <option value="PBD">PBD (Partner Business Development)</option>
+          <!-- 选项：PBD（合作伙伴商务拓展） -->
         </select>
       </div>
       <div class="form-group">
         <label class="form-label">Desired Password</label>
+        <!-- 期望密码标签 -->
         <input type="password" id="apply-pass" class="form-input" placeholder="Choose a password">
+        <!-- 密码输入框 -->
       </div>
       <button class="btn btn-primary" onclick="doApply()">Submit Request</button>
+      <!-- 提交申请按钮 -->
       <p class="apply-note">Your account will be active once approved by an administrator.</p>
+      <!-- 提示：账号需管理员审批后方可使用 -->
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ MAIN APP ═══════════════ -->
+<!-- ═══════════════ 主应用界面 ═══════════════ -->
 <div id="app">
+  <!-- 顶部导航栏 -->
   <header class="topbar">
     <div class="topbar-logo">
+      <!-- 顶部 Logo -->
       <div class="mark">H</div>
       <div class="brand">Huawei <span>Pipeline</span></div>
     </div>
     <div class="topbar-divider"></div>
+    <!-- 分隔线 -->
     <nav class="nav-tabs">
+      <!-- 导航标签栏 -->
       <div class="nav-tab active" onclick="goPage('dashboard')" data-page="dashboard"><span class="icon">📊</span> Dashboard</div>
+      <!-- 仪表盘页签（默认激活） -->
       <div class="nav-tab" onclick="goPage('pipeline')" data-page="pipeline"><span class="icon">🔄</span> Pipeline</div>
+      <!-- 管道看板页签 -->
       <div class="nav-tab" onclick="goPage('records')" data-page="records"><span class="icon">📋</span> Records</div>
+      <!-- 记录列表页签 -->
       <div class="nav-tab admin-only" onclick="goPage('users')" data-page="users"><span class="icon">👥</span> Users</div>
+      <!-- 用户管理页签（仅管理员可见） -->
       <div class="nav-tab admin-only" onclick="goPage('import')" data-page="import"><span class="icon">📥</span> Import</div>
+      <!-- 数据导入页签（管理员可见） -->
       <div class="nav-tab user-only" onclick="goPage('import')" data-page="import" style="display:none"><span class="icon">📥</span> Import</div>
+      <!-- 数据导入页签（普通用户可见） -->
       <div class="nav-tab" onclick="goPage('profile')" data-page="profile"><span class="icon">⚙️</span> Profile</div>
+      <!-- 个人资料页签 -->
     </nav>
     <div class="topbar-right">
+      <!-- 顶部右侧区域 -->
       <div class="user-badge" onclick="goPage('profile')">
+        <!-- 当前用户信息徽章（点击跳转到个人资料页） -->
         <div class="dot"></div>
+        <!-- 在线状态绿点 -->
         <span id="topbar-username">—</span>
+        <!-- 显示用户名 -->
         <span class="role-chip" id="topbar-role">—</span>
+        <!-- 显示用户角色标签 -->
       </div>
       <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>
+      <!-- 登出按钮 -->
     </div>
   </header>
 
-  <!-- Pages will be included from app.html -->
+  <!-- 页面内容容器（由 app.js 动态加载页面内容） -->
   <div id="pages-container"></div>
 </div>
 
-<!-- Modals will be included from modals.html -->
+<!-- 模态框容器（由 app.js 动态加载模态框内容） -->
 <div id="modals-container"></div>
 
-<!-- Scripts -->
+<!-- 脚本引入 -->
 <script src="js/app.js"></script>
+<!-- 主应用脚本：初始化、认证、导航、通用功能 -->
 <script src="js/dashboard.js"></script>
+<!-- 仪表盘和管道看板渲染脚本 -->
 <script src="js/records.js"></script>
+<!-- 记录管理脚本（增删改查） -->
 <script src="js/users.js"></script>
+<!-- 用户管理脚本（管理员功能） -->
 <script src="js/import-export.js"></script>
+<!-- 数据导入/导出脚本 -->
 
 </body>
 </html>

@@ -1,69 +1,81 @@
+# GitHub Actions 工作流：部署到华为云
 name: Deploy to Huawei Cloud
 
+# 触发条件
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches: [main]                       # 推送到 main 分支时自动触发
+  workflow_dispatch:                       # 支持手动触发
 
+# 全局环境变量
 env:
-  REGISTRY: swr.tr-istanbul.myhuaweicloud.com
-  IMAGE_NAME: pipeline-manager
-  IMAGE_TAG: latest
+  REGISTRY: swr.tr-istanbul.myhuaweicloud.com  # 华为云容器镜像服务（SWR）地址
+  IMAGE_NAME: pipeline-manager             # Docker 镜像名称
+  IMAGE_TAG: latest                        # 镜像标签
 
+# 任务定义
 jobs:
+  # 任务 1：构建并推送 Docker 镜像
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest                 # 在 Ubuntu 最新版运行器上执行
     permissions:
-      contents: read
+      contents: read                       # 仅需读取仓库内容的权限
       
     steps:
-      - name: Checkout repository
+      - name: Checkout repository          # 步骤 1：检出仓库代码
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
+      - name: Set up Docker Buildx         # 步骤 2：设置 Docker Buildx 多平台构建工具
         uses: docker/setup-buildx-action@v2
 
-      - name: Log in to Huawei SWR
+      - name: Log in to Huawei SWR         # 步骤 3：登录华为云 SWR 镜像仓库
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.HUAWEI_CLOUD_USERNAME }}
-          password: ${{ secrets.HUAWEI_CLOUD_PASSWORD }}
+          registry: ${{ env.REGISTRY }}    # SWR 注册中心地址
+          username: ${{ secrets.HUAWEI_CLOUD_USERNAME }}  # 华为云用户名（GitHub Secrets）
+          password: ${{ secrets.HUAWEI_CLOUD_PASSWORD }}  # 华为云密码（GitHub Secrets）
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image  # 步骤 4：构建并推送 Docker 镜像
         uses: docker/build-push-action@v4
         with:
-          context: .
-          push: true
-          tags: |
+          context: .                       # 构建上下文为当前目录
+          push: true                       # 推送到远程仓库
+          tags: |                          # 镜像标签（同时打 latest 和 commit hash 两个标签）
             ${{ env.REGISTRY }}/${{ secrets.HUAWEI_CLOUD_ORGANIZATION }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             ${{ env.REGISTRY }}/${{ secrets.HUAWEI_CLOUD_ORGANIZATION }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha             # 使用 GitHub Actions 缓存加速构建
+          cache-to: type=gha,mode=max      # 最大化缓存
 
+  # 任务 2：部署到华为云 ECS
   deploy:
-    needs: build-and-push
+    needs: build-and-push                  # 依赖任务 1 完成后才执行
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repository          # 步骤 1：检出仓库代码
         uses: actions/checkout@v3
 
-      - name: Deploy to Huawei ECS
+      - name: Deploy to Huawei ECS         # 步骤 2：部署到华为云弹性云服务器
         env:
-          HUAWEI_AK: ${{ secrets.HUAWEI_CLOUD_AK }}
-          HUAWEI_SK: ${{ secrets.HUAWEI_CLOUD_SK }}
-          HUAWEI_PROJECT_ID: ${{ secrets.HUAWEI_CLOUD_PROJECT_ID }}
-          ECS_INSTANCE_ID: ${{ secrets.HUAWEI_ECS_INSTANCE_ID }}
+          HUAWEI_AK: ${{ secrets.HUAWEI_CLOUD_AK }}              # 华为云 Access Key
+          HUAWEI_SK: ${{ secrets.HUAWEI_CLOUD_SK }}              # 华为云 Secret Key
+          HUAWEI_PROJECT_ID: ${{ secrets.HUAWEI_CLOUD_PROJECT_ID }} # 项目 ID
+          ECS_INSTANCE_ID: ${{ secrets.HUAWEI_ECS_INSTANCE_ID }}    # ECS 实例 ID
           IMAGE_URL: ${{ env.REGISTRY }}/${{ secrets.HUAWEI_CLOUD_ORGANIZATION }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          # 完整的镜像 URL
         run: |
           echo "📦 Docker image pushed to Huawei SWR:"
           echo "   $IMAGE_URL"
+          # 输出镜像已推送到 SWR 的信息
           echo ""
           echo "✅ Next steps:"
           echo "   1. Log in to Huawei Cloud Console"
+          # 下一步 1：登录华为云控制台
           echo "   2. Navigate to ECS → Instances"
+          # 下一步 2：进入 ECS 实例列表
           echo "   3. SSH into your instance"
+          # 下一步 3：SSH 连接到实例
           echo "   4. Pull and run the latest image:"
+          # 下一步 4：拉取并运行最新镜像
           echo "      docker pull $IMAGE_URL"
           echo "      docker run -d -p 5000:5000 \\"
           echo "        -e NODE_ENV=production \\"

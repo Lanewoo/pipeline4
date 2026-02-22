@@ -211,7 +211,7 @@ docker-compose up -d
 
 ### Default Credentials
 - **Username**: admin
-- **Password**: huawei@123
+- **Password**: Set via `DEFAULT_ADMIN_PASSWORD` in `.env`
 
 ### Access
 - **Local**: http://localhost:5000

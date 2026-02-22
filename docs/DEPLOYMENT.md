@@ -28,9 +28,9 @@ Access at `http://localhost:5000`
 
 **Default Credentials:**
 - Username: `admin`
-- Password: `huawei@123`
+- Password: (set via `DEFAULT_ADMIN_PASSWORD` in `.env`)
 
-⚠️ Change these immediately in production!
+⚠️ Set a strong password in `.env` before first run!
 
 ---
 

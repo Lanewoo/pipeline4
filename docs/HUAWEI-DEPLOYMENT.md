@@ -295,8 +295,8 @@ docker logs pipeline-manager
 
 # Default credentials
 # Username: admin
-# Password: huawei@123
-# ⚠️ CHANGE THESE IMMEDIATELY!
+# Password: (set via DEFAULT_ADMIN_PASSWORD in .env)
+# ⚠️ SET A STRONG PASSWORD IN .env BEFORE FIRST RUN!
 ```
 
 ---

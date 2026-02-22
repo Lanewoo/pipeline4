@@ -90,8 +90,8 @@ pipeline-manager-deployed/
 ├── 🔄 CI/CD
 │   └── .circleci/config.yml (CircleCI pipeline)
 │
-└── 📁 DATA FOLDER (/data) - Created at runtime
-    └── pipeline.db (SQLite database)
+└── 🗄️ DATABASE
+    └── Huawei Cloud RDS (PostgreSQL) - Remote managed database
 
 TOTAL: 20 files + organization
 ```
@@ -140,10 +140,10 @@ See `docs/DEPLOYMENT.md` for detailed instructions.
 | Field | Value |
 |-------|-------|
 | **Username** | admin |
-| **Password** | huawei@123 |
+| **Password** | Set via `DEFAULT_ADMIN_PASSWORD` in `.env` |
 | **Role** | Administrator |
 
-⚠️ **ACTION REQUIRED**: Change before production deployment
+⚠️ **ACTION REQUIRED**: Set `DEFAULT_ADMIN_PASSWORD` in `.env` before first run
 
 ---
 
@@ -245,7 +245,7 @@ docker-compose up -d
 ```
 http://localhost:5000
 Username: admin
-Password: huawei@123
+Password: (value of DEFAULT_ADMIN_PASSWORD from .env)
 ```
 
 ### **View Logs**
@@ -311,7 +311,7 @@ Your Pipeline Manager is now:
    ```
 
 2. **Explore Features**
-   - Login with admin/huawei@123
+   - Login with admin and the password from your `.env`
    - Create sample records
    - Test import/export
    - Try different user roles

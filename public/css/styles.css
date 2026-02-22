@@ -1,230 +1,289 @@
 /* ═══════════════════════════════════════════════════════════════ */
-/*  HUAWEI PIPELINE MANAGER - STYLES                              */
+/*  华为管道管理系统 - 样式表                                      */
 /* ═══════════════════════════════════════════════════════════════ */
 
+/* 引入 Google 字体：Syne（标题）、DM Mono（等宽）、DM Sans（正文） */
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
 
+/* CSS 变量定义（全局主题色、字体、间距等） */
 :root {
-  --bg: #0a0c0f;
-  --surface: #111318;
-  --surface2: #181c23;
-  --surface3: #1e2330;
-  --border: rgba(255,255,255,0.07);
-  --border-active: rgba(220,30,30,0.5);
-  --red: #e8192c;
-  --red-dim: rgba(232,25,44,0.15);
-  --red-glow: rgba(232,25,44,0.3);
-  --text: #f0f2f5;
-  --text-muted: #6b7280;
-  --text-soft: #9ca3af;
-  --green: #10b981;
-  --amber: #f59e0b;
-  --blue: #3b82f6;
-  --purple: #8b5cf6;
-  --cyan: #06b6d4;
-  --success: #059669;
-  --warning: #d97706;
-  --danger: #dc2626;
-  --font-head: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  --radius: 10px;
-  --radius-lg: 16px;
-  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
-  --shadow: 0 4px 24px rgba(0,0,0,0.4);
-  --shadow-lg: 0 8px 48px rgba(0,0,0,0.6);
+  --bg: #0a0c0f;                /* 页面背景色（深黑） */
+  --surface: #111318;           /* 卡片/面板背景色 */
+  --surface2: #181c23;          /* 二级面板背景色 */
+  --surface3: #1e2330;          /* 三级面板背景色 */
+  --border: rgba(255,255,255,0.07);    /* 默认边框颜色（半透明白） */
+  --border-active: rgba(220,30,30,0.5); /* 激活状态边框颜色（红色） */
+  --red: #e8192c;               /* 华为品牌红色 */
+  --red-dim: rgba(232,25,44,0.15);     /* 红色淡化（用于背景） */
+  --red-glow: rgba(232,25,44,0.3);     /* 红色发光效果 */
+  --text: #f0f2f5;              /* 主文本颜色（浅白） */
+  --text-muted: #6b7280;        /* 次要文本颜色（灰色） */
+  --text-soft: #9ca3af;         /* 柔和文本颜色 */
+  --green: #10b981;             /* 绿色（成功状态） */
+  --amber: #f59e0b;             /* 琥珀色（警告状态） */
+  --blue: #3b82f6;              /* 蓝色（信息/BD 角色） */
+  --purple: #8b5cf6;            /* 紫色（PBD 角色） */
+  --cyan: #06b6d4;              /* 青色（标签） */
+  --success: #059669;           /* 成功色 */
+  --warning: #d97706;           /* 警告色 */
+  --danger: #dc2626;            /* 危险/错误色 */
+  --font-head: 'Syne', sans-serif;     /* 标题字体 */
+  --font-body: 'DM Sans', sans-serif;  /* 正文字体 */
+  --font-mono: 'DM Mono', monospace;   /* 等宽字体（数字/代码） */
+  --radius: 10px;               /* 默认圆角 */
+  --radius-lg: 16px;            /* 大圆角 */
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1); /* 默认过渡动画 */
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);    /* 默认阴影 */
+  --shadow-lg: 0 8px 48px rgba(0,0,0,0.6); /* 大阴影 */
 }
 
+/* 全局重置：所有元素使用 border-box 盒模型，清除默认外边距和内边距 */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* 全局 body 样式 */
 body {
-  font-family: var(--font-body);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-  font-size: 14px;
-  line-height: 1.6;
+  font-family: var(--font-body);  /* 使用 DM Sans 正文字体 */
+  background: var(--bg);          /* 深色背景 */
+  color: var(--text);             /* 浅色文字 */
+  min-height: 100vh;              /* 最小高度为视口高度 */
+  overflow-x: hidden;             /* 隐藏水平滚动条 */
+  font-size: 14px;                /* 基础字号 */
+  line-height: 1.6;               /* 行高 */
 }
 
-/* ── LOGIN ── */
+/* ── 登录界面样式 ── */
 #login-screen {
-  position: fixed; inset: 0;
-  display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0;      /* 固定定位，覆盖全屏 */
+  display: flex; align-items: center; justify-content: center; /* 居中对齐 */
   background: radial-gradient(ellipse at 30% 20%, rgba(232,25,44,0.12) 0%, transparent 60%),
               radial-gradient(ellipse at 80% 80%, rgba(59,130,246,0.08) 0%, transparent 60%), var(--bg);
-  z-index: 1000;
+  /* 渐变背景：左上角红色光晕 + 右下角蓝色光晕 */
+  z-index: 1000;                  /* 最高层级 */
 }
 #login-screen::before {
   content: '';
-  position: absolute; inset: 0;
+  position: absolute; inset: 0;   /* 覆盖全屏 */
   background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
+  background-size: 32px 32px;     /* 背景网格点阵图案 */
 }
+/* 登录卡片容器 */
 .login-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 48px 40px;
-  width: 420px;
+  background: var(--surface);     /* 卡片背景 */
+  border: 1px solid var(--border); /* 边框 */
+  border-radius: var(--radius-lg); /* 大圆角 */
+  padding: 48px 40px;             /* 内边距 */
+  width: 420px;                   /* 固定宽度 */
   position: relative;
-  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.04);
-  animation: fadeUp 0.5s ease;
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.04); /* 大阴影 + 微光边 */
+  animation: fadeUp 0.5s ease;    /* 进入动画：从下往上淡入 */
 }
+/* 登录卡片顶部红色装饰线 */
 .login-card::before {
   content: '';
   position: absolute; top: 0; left: 40px; right: 40px; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--red), transparent);
+  background: linear-gradient(90deg, transparent, var(--red), transparent); /* 红色渐变线 */
   border-radius: 0 0 4px 4px;
 }
+/* 登录页 Logo 区域 */
 .login-logo {
   display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
 }
+/* Logo 图标（红色方块中的 H） */
 .login-logo .mark {
   width: 44px; height: 44px;
-  background: var(--red);
-  border-radius: 10px;
+  background: var(--red);         /* 红色背景 */
+  border-radius: 10px;            /* 圆角 */
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-head); font-weight: 800; font-size: 20px; color: white;
-  box-shadow: 0 4px 16px var(--red-glow);
+  box-shadow: 0 4px 16px var(--red-glow); /* 红色发光阴影 */
 }
+/* Logo 品牌文字 */
 .login-logo .brand { font-family: var(--font-head); font-size: 22px; font-weight: 700; }
-.login-logo .brand span { color: var(--red); }
+.login-logo .brand span { color: var(--red); } /* "Pipeline" 文字为红色 */
+/* 登录标题 */
 .login-title { font-family: var(--font-head); font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+/* 登录副标题 */
 .login-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 32px; }
+/* 登录/注册 切换标签栏 */
 .login-tabs {
   display: flex; gap: 4px; background: var(--surface2); border-radius: 8px;
   padding: 4px; margin-bottom: 24px;
 }
+/* 单个切换标签 */
 .login-tab {
   flex: 1; padding: 8px; text-align: center; border-radius: 6px;
   cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-muted);
   transition: var(--transition);
 }
+/* 激活状态的标签（红色背景白色文字） */
 .login-tab.active { background: var(--red); color: white; }
 
-/* ── FORMS ── */
-.form-group { margin-bottom: 18px; }
+/* ── 表单样式 ── */
+.form-group { margin-bottom: 18px; }       /* 表单项间距 */
+/* 表单标签 */
 .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-soft); margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+/* 表单输入框 */
 .form-input {
   width: 100%; padding: 11px 14px; background: var(--surface2);
   border: 1px solid var(--border); border-radius: 8px;
   color: var(--text); font-family: var(--font-body); font-size: 14px;
   transition: var(--transition); outline: none;
 }
+/* 输入框获得焦点时：红色边框 + 红色光晕 */
 .form-input:focus { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-dim); }
+/* 输入框占位文字颜色 */
 .form-input::placeholder { color: var(--text-muted); }
+/* 下拉选择框指针样式 */
 select.form-input { cursor: pointer; }
 
-/* ── BUTTONS ── */
+/* ── 按钮样式 ── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer;
   font-family: var(--font-body); font-size: 14px; font-weight: 600;
   transition: var(--transition); text-decoration: none;
 }
+/* 主要按钮（红色背景） */
 .btn-primary { background: var(--red); color: white; width: 100%; }
+/* 主要按钮悬停效果 */
 .btn-primary:hover { background: #c81424; box-shadow: 0 4px 20px var(--red-glow); transform: translateY(-1px); }
+/* 次要按钮（深色背景 + 边框） */
 .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
 .btn-secondary:hover { background: var(--surface3); border-color: var(--border-active); }
+/* 幽灵按钮（透明背景） */
 .btn-ghost { background: transparent; color: var(--text-soft); border: 1px solid var(--border); }
 .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+/* 危险按钮（红色调） */
 .btn-danger { background: rgba(220,38,38,0.15); color: #ef4444; border: 1px solid rgba(220,38,38,0.3); }
 .btn-danger:hover { background: rgba(220,38,38,0.25); }
+/* 成功按钮（绿色调） */
 .btn-success { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
 .btn-success:hover { background: rgba(16,185,129,0.25); }
+/* 小号按钮 */
 .btn-sm { padding: 6px 12px; font-size: 12px; }
+/* 超小号按钮 */
 .btn-xs { padding: 4px 8px; font-size: 11px; }
+/* 禁用按钮 */
 .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
-/* ── ALERTS ── */
+/* ── 提示框样式 ── */
 .alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
+/* 错误提示（红色） */
 .alert-error { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+/* 成功提示（绿色） */
 .alert-success { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+/* 信息提示（蓝色） */
 .alert-info { background: rgba(59,130,246,0.12); color: var(--blue); border: 1px solid rgba(59,130,246,0.25); }
+/* 显示状态的提示框 */
 .alert.show { display: block; animation: fadeIn 0.2s ease; }
 
-/* ── APP LAYOUT ── */
-#app { display: none; height: 100vh; flex-direction: column; }
-#app.visible { display: flex; }
+/* ── 应用主布局 ── */
+#app { display: none; height: 100vh; flex-direction: column; } /* 默认隐藏，登录后显示 */
+#app.visible { display: flex; }           /* 登录后变为可见，flex 纵向布局 */
 
+/* 顶部导航栏 */
 .topbar {
   height: 60px; background: var(--surface); border-bottom: 1px solid var(--border);
   display: flex; align-items: center; padding: 0 24px; gap: 16px; flex-shrink: 0;
-  position: sticky; top: 0; z-index: 100;
+  position: sticky; top: 0; z-index: 100; /* 固定在顶部 */
 }
+/* 顶部 Logo 区域 */
 .topbar-logo { display: flex; align-items: center; gap: 10px; }
+/* 顶部 Logo 图标 */
 .topbar-logo .mark {
   width: 32px; height: 32px; background: var(--red); border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-head); font-weight: 800; font-size: 14px; color: white;
 }
+/* 顶部品牌文字 */
 .topbar-logo .brand { font-family: var(--font-head); font-weight: 700; font-size: 16px; }
 .topbar-logo .brand span { color: var(--red); }
+/* 顶部分隔线 */
 .topbar-divider { width: 1px; height: 28px; background: var(--border); }
 
+/* 导航标签栏 */
 .nav-tabs { display: flex; gap: 2px; flex: 1; }
+/* 单个导航标签 */
 .nav-tab {
   padding: 7px 16px; border-radius: 7px; cursor: pointer;
   font-size: 13px; font-weight: 500; color: var(--text-muted);
   transition: var(--transition); display: flex; align-items: center; gap: 7px;
 }
+/* 导航标签悬停 */
 .nav-tab:hover { background: var(--surface2); color: var(--text); }
+/* 激活状态的导航标签（红色调） */
 .nav-tab.active { background: var(--red-dim); color: var(--red); }
+/* 导航标签图标 */
 .nav-tab .icon { font-size: 15px; }
 
+/* 顶部右侧区域 */
 .topbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+/* 用户信息徽章 */
 .user-badge {
   display: flex; align-items: center; gap: 8px; padding: 5px 12px;
   background: var(--surface2); border-radius: 20px; border: 1px solid var(--border);
   font-size: 12px; font-weight: 500; cursor: pointer;
 }
+/* 在线状态绿点 */
 .user-badge .dot {
   width: 7px; height: 7px; border-radius: 50%; background: var(--green);
   box-shadow: 0 0 6px var(--green);
 }
+/* 角色标签芯片 */
 .user-badge .role-chip {
   font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
   letter-spacing: 0.05em; text-transform: uppercase;
 }
+/* 管理员角色标签（红色） */
 .role-chip.admin { background: rgba(232,25,44,0.2); color: var(--red); }
+/* BD 角色标签（蓝色） */
 .role-chip.bd { background: rgba(59,130,246,0.2); color: var(--blue); }
+/* PBD 角色标签（紫色） */
 .role-chip.pbd { background: rgba(139,92,246,0.2); color: var(--purple); }
 
-/* ── PAGES ── */
-.page { display: none; flex: 1; overflow: auto; }
-.page.active { display: flex; flex-direction: column; }
-.page-inner { padding: 28px 28px; max-width: 1800px; width: 100%; margin: 0 auto; }
+/* ── 页面容器 ── */
+.page { display: none; flex: 1; overflow: auto; } /* 所有页面默认隐藏 */
+.page.active { display: flex; flex-direction: column; } /* 激活页面显示 */
+.page-inner { padding: 28px 28px; max-width: 1800px; width: 100%; margin: 0 auto; } /* 页面内容区域 */
 
-/* ── STAT CARDS ── */
+/* ── 统计卡片 ── */
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+/* 单个统计卡片 */
 .stat-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
   padding: 20px; position: relative; overflow: hidden;
 }
+/* 卡片顶部彩色装饰线 */
 .stat-card::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 3px;
 }
-.stat-card.red::before { background: linear-gradient(90deg, var(--red), transparent); }
-.stat-card.green::before { background: linear-gradient(90deg, var(--green), transparent); }
-.stat-card.blue::before { background: linear-gradient(90deg, var(--blue), transparent); }
-.stat-card.amber::before { background: linear-gradient(90deg, var(--amber), transparent); }
-.stat-card.purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
+.stat-card.red::before { background: linear-gradient(90deg, var(--red), transparent); }     /* 红色装饰线 */
+.stat-card.green::before { background: linear-gradient(90deg, var(--green), transparent); } /* 绿色装饰线 */
+.stat-card.blue::before { background: linear-gradient(90deg, var(--blue), transparent); }   /* 蓝色装饰线 */
+.stat-card.amber::before { background: linear-gradient(90deg, var(--amber), transparent); } /* 琥珀色装饰线 */
+.stat-card.purple::before { background: linear-gradient(90deg, var(--purple), transparent); } /* 紫色装饰线 */
+/* 统计标签 */
 .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
+/* 统计数值 */
 .stat-value { font-family: var(--font-head); font-size: 28px; font-weight: 700; }
+/* 统计附加说明 */
 .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
-/* ── TABLES ── */
+/* ── 表格样式 ── */
+/* 表格外层卡片容器 */
 .table-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
   overflow: hidden;
 }
+/* 表格头部工具栏 */
 .table-header {
   padding: 16px 20px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
+/* 表格标题 */
 .table-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; flex: 1; }
+/* 搜索输入框 */
 .search-input {
   padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border);
   border-radius: 8px; color: var(--text); font-size: 13px; outline: none;
@@ -233,139 +292,187 @@ select.form-input { cursor: pointer; }
 .search-input:focus { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-dim); }
 .search-input::placeholder { color: var(--text-muted); }
 
+/* 表格滚动容器 */
 .table-wrap { overflow-x: auto; }
+/* 表格基础样式 */
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
+/* 表头单元格 */
 thead th {
   padding: 10px 12px; text-align: left; white-space: nowrap;
   font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border);
-  position: sticky; top: 0;
+  position: sticky; top: 0;       /* 表头固定 */
 }
 thead th:first-child { border-radius: 0; padding-left: 20px; }
+/* 表格行样式 */
 tbody tr {
   border-bottom: 1px solid var(--border); transition: background var(--transition);
 }
+/* 表格行悬停高亮 */
 tbody tr:hover { background: var(--surface2); }
+/* 表格单元格 */
 tbody td { padding: 10px 12px; color: var(--text-soft); vertical-align: middle; }
+/* 第一列加粗 */
 tbody td:first-child { padding-left: 20px; color: var(--text); font-weight: 500; }
+/* 最后一行去掉底部边框 */
 tbody tr:last-child { border-bottom: none; }
 
-/* ── BADGES ── */
+/* ── 徽章/标签样式 ── */
 .badge {
   display: inline-flex; align-items: center; padding: 3px 8px;
   border-radius: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
   text-transform: uppercase; white-space: nowrap;
 }
-.badge-red { background: rgba(232,25,44,0.15); color: var(--red); }
-.badge-green { background: rgba(16,185,129,0.15); color: var(--green); }
-.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
-.badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); }
-.badge-purple { background: rgba(139,92,246,0.15); color: var(--purple); }
-.badge-cyan { background: rgba(6,182,212,0.15); color: var(--cyan); }
-.badge-gray { background: rgba(107,114,128,0.15); color: var(--text-muted); }
+.badge-red { background: rgba(232,25,44,0.15); color: var(--red); }       /* 红色徽章 */
+.badge-green { background: rgba(16,185,129,0.15); color: var(--green); }   /* 绿色徽章 */
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }     /* 蓝色徽章 */
+.badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); }   /* 琥珀色徽章 */
+.badge-purple { background: rgba(139,92,246,0.15); color: var(--purple); } /* 紫色徽章 */
+.badge-cyan { background: rgba(6,182,212,0.15); color: var(--cyan); }     /* 青色徽章 */
+.badge-gray { background: rgba(107,114,128,0.15); color: var(--text-muted); } /* 灰色徽章 */
 
-/* ── MODAL ── */
+/* ── 模态框样式 ── */
+/* 模态框遮罩层 */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500;
   display: none; align-items: center; justify-content: center;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);     /* 背景模糊效果 */
 }
+/* 模态框打开状态 */
 .modal-overlay.open { display: flex; animation: fadeIn 0.15s ease; }
+/* 模态框主体 */
 .modal {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-lg); width: 90%; max-width: 720px;
   max-height: 90vh; overflow: auto; box-shadow: var(--shadow-lg);
-  animation: slideUp 0.2s ease;
+  animation: slideUp 0.2s ease;   /* 弹出动画 */
 }
+/* 宽模态框 */
 .modal-wide { max-width: 960px; }
+/* 模态框头部 */
 .modal-header {
   padding: 20px 24px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
 }
+/* 模态框标题 */
 .modal-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; }
+/* 模态框关闭按钮 */
 .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px; line-height: 1; padding: 4px; border-radius: 4px; transition: var(--transition); }
 .modal-close:hover { color: var(--text); background: var(--surface2); }
+/* 模态框内容区域 */
 .modal-body { padding: 24px; }
+/* 模态框底部操作栏 */
 .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
 
-/* ── FORMS GRID ── */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-.full-width { grid-column: 1 / -1; }
-.month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+/* ── 表单网格布局 ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }    /* 两列布局 */
+.form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }                        /* 三列布局 */
+.full-width { grid-column: 1 / -1; }                                         /* 占满整行 */
+.month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; } /* 月份输入六列布局 */
 
-/* ── PIPELINE STAGES ── */
+/* ── 管道看板阶段列 ── */
 .stage-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+/* 单个阶段列 */
 .stage-col { background: var(--surface2); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; }
+/* 阶段列头部 */
 .stage-col-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+/* 阶段名称 */
 .stage-col-name { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+/* 阶段计数标签 */
 .stage-count { background: var(--surface3); border-radius: 10px; padding: 2px 8px; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+/* 阶段内的卡片容器 */
 .stage-cards { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 80px; }
+/* 管道卡片 */
 .pipeline-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
   padding: 12px; cursor: pointer; transition: var(--transition);
 }
+/* 管道卡片悬停效果 */
 .pipeline-card:hover { border-color: var(--red); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+/* 卡片中的客户名 */
 .pc-name { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+/* 卡片中的合作伙伴名 */
 .pc-partner { font-size: 11px; color: var(--text-muted); }
+/* 卡片底部区域 */
 .pc-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
 
-/* ── CHARTS ── */
+/* ── 图表样式 ── */
+/* 图表行布局（左侧宽 2 份，右侧宽 1 份） */
 .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+/* 图表卡片 */
 .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+/* 图表标签 */
 .chart-label { font-family: var(--font-head); font-size: 14px; font-weight: 700; margin-bottom: 16px; color: var(--text-muted); }
+/* 柱状图容器 */
 .bar-chart { display: flex; align-items: flex-end; gap: 10px; height: 120px; }
+/* 单个柱的包裹容器 */
 .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
+/* 柱状图的柱子 */
 .bar { border-radius: 4px 4px 0 0; transition: height 0.5s ease; width: 100%; }
+/* 柱底部月份名 */
 .bar-name { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
+/* 柱顶部数值 */
 .bar-val { font-size: 10px; color: var(--text-soft); font-family: var(--font-mono); }
 
+/* 环形图样式 */
 .donut-chart { position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-.donut-svg { transform: rotate(-90deg); }
+.donut-svg { transform: rotate(-90deg); }  /* SVG 旋转使起始点在顶部 */
+/* 环形图中心内容 */
 .donut-center { position: absolute; text-align: center; }
+/* 环形图中心数字 */
 .donut-center .num { font-family: var(--font-head); font-size: 24px; font-weight: 800; }
+/* 环形图中心标签 */
 .donut-center .lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
 
-/* ── USER MGMT ── */
+/* ── 用户管理区域 ── */
+/* 区域头部（标题 + 操作按钮） */
 .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+/* 区域标题 */
 .section-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; }
+/* 区域副标题 */
 .section-sub { font-size: 13px; color: var(--text-muted); }
 
+/* 待审批用户卡片 */
 .pending-card {
   background: var(--surface); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius);
   padding: 16px 20px; display: flex; align-items: center; gap: 16px;
   margin-bottom: 10px; transition: var(--transition);
 }
-.pending-card:hover { border-color: var(--amber); }
-.pending-card-info { flex: 1; }
-.pending-card-name { font-weight: 600; font-size: 14px; }
-.pending-card-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.pending-actions { display: flex; gap: 8px; }
+.pending-card:hover { border-color: var(--amber); }   /* 悬停时边框变琥珀色 */
+.pending-card-info { flex: 1; }                        /* 信息区域占满剩余空间 */
+.pending-card-name { font-weight: 600; font-size: 14px; } /* 待审批用户姓名 */
+.pending-card-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; } /* 元信息（用户名、角色、时间） */
+.pending-actions { display: flex; gap: 8px; }          /* 操作按钮容器 */
 
-/* ── IMPORT ── */
+/* ── 数据导入区域 ── */
+/* 文件拖放区域 */
 .drop-zone {
   border: 2px dashed var(--border); border-radius: var(--radius-lg);
   padding: 48px; text-align: center; cursor: pointer;
   transition: var(--transition); background: var(--surface2);
 }
+/* 拖放区域悬停/拖入效果 */
 .drop-zone:hover, .drop-zone.drag-over {
   border-color: var(--red); background: var(--red-dim);
 }
-.drop-icon { font-size: 48px; margin-bottom: 12px; }
-.drop-text { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-.drop-sub { font-size: 13px; color: var(--text-muted); }
+.drop-icon { font-size: 48px; margin-bottom: 12px; }   /* 拖放图标 */
+.drop-text { font-size: 15px; font-weight: 600; margin-bottom: 6px; } /* 拖放提示文字 */
+.drop-sub { font-size: 13px; color: var(--text-muted); } /* 拖放说明文字 */
 
+/* 列匹配表格（导入预览） */
 .col-match-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .col-match-table th { padding: 8px 10px; background: var(--surface2); color: var(--text-muted); font-weight: 600; text-align: left; }
 .col-match-table td { padding: 8px 10px; border-top: 1px solid var(--border); }
-.match-ok { color: var(--green); }
-.match-miss { color: var(--danger); }
+.match-ok { color: var(--green); }        /* 匹配成功（绿色） */
+.match-miss { color: var(--danger); }      /* 匹配失败（红色） */
 
-/* ── PROFILE ── */
+/* ── 个人资料页 ── */
+/* 个人资料卡片 */
 .profile-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
   padding: 28px; max-width: 500px;
 }
+/* 头像圆形图标 */
 .profile-avatar {
   width: 64px; height: 64px; border-radius: 50%; background: var(--red);
   display: flex; align-items: center; justify-content: center;
@@ -373,34 +480,42 @@ tbody tr:last-child { border-bottom: none; }
   margin-bottom: 16px; box-shadow: 0 4px 16px var(--red-glow);
 }
 
-/* ── UTILITIES ── */
+/* ── 工具类样式 ── */
+/* 概率进度条（背景） */
 .prob-bar { height: 4px; border-radius: 2px; background: var(--surface3); overflow: hidden; }
+/* 概率进度条（填充部分） */
 .prob-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+/* 空状态提示 */
 .empty-state { text-align: center; padding: 48px; color: var(--text-muted); }
 .empty-icon { font-size: 40px; margin-bottom: 12px; }
+/* 标签 */
 .tag { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 4px; font-size: 11px; background: var(--surface3); color: var(--text-soft); }
-.gap-1 { gap: 4px; }
-.flex { display: flex; }
-.items-center { align-items: center; }
-.flex-wrap { flex-wrap: wrap; }
-.mt-4 { margin-top: 16px; }
-.mt-2 { margin-top: 8px; }
-.mb-4 { margin-bottom: 16px; }
-.text-mono { font-family: var(--font-mono); }
-.text-red { color: var(--red); }
-.text-green { color: var(--green); }
-.text-muted { color: var(--text-muted); }
-.font-bold { font-weight: 700; }
-.font-head { font-family: var(--font-head); }
+/* 通用工具类 */
+.gap-1 { gap: 4px; }                      /* 间距 4px */
+.flex { display: flex; }                   /* 弹性布局 */
+.items-center { align-items: center; }     /* 垂直居中 */
+.flex-wrap { flex-wrap: wrap; }            /* 允许换行 */
+.mt-4 { margin-top: 16px; }               /* 上外边距 16px */
+.mt-2 { margin-top: 8px; }                /* 上外边距 8px */
+.mb-4 { margin-bottom: 16px; }            /* 下外边距 16px */
+.text-mono { font-family: var(--font-mono); } /* 等宽字体 */
+.text-red { color: var(--red); }           /* 红色文字 */
+.text-green { color: var(--green); }       /* 绿色文字 */
+.text-muted { color: var(--text-muted); }  /* 灰色文字 */
+.font-bold { font-weight: 700; }          /* 粗体 */
+.font-head { font-family: var(--font-head); } /* 标题字体 */
+/* 下拉选项背景色（适配深色主题） */
 select option { background: #1e2330; color: #f0f2f5; }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #374151; }
+/* 自定义滚动条样式（Webkit 浏览器） */
+::-webkit-scrollbar { width: 6px; height: 6px; }            /* 滚动条宽高 */
+::-webkit-scrollbar-track { background: transparent; }       /* 滚动条轨道透明 */
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; } /* 滚动条滑块 */
+::-webkit-scrollbar-thumb:hover { background: #374151; }     /* 滑块悬停 */
 
+/* 筛选行 */
 .filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+/* 筛选下拉框 */
 .filter-select {
   padding: 7px 12px; background: var(--surface2); border: 1px solid var(--border);
   border-radius: 8px; color: var(--text); font-size: 12px; outline: none; cursor: pointer;
@@ -408,35 +523,44 @@ select option { background: #1e2330; color: #f0f2f5; }
 }
 .filter-select:focus { border-color: var(--red); }
 
+/* 信息行（记录详情中使用） */
 .info-row { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 20px; padding: 16px 20px; background: var(--surface2); border-radius: var(--radius); border: 1px solid var(--border); }
 .info-item { }
+/* 信息项标签 */
 .info-item .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); font-weight: 600; }
+/* 信息项值 */
 .info-item .val { font-size: 14px; font-weight: 600; margin-top: 2px; }
 
+/* 页面内部标签页 */
 .tabs-inner { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+/* 单个内部标签 */
 .tab-inner { padding: 9px 16px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-muted); border-bottom: 2px solid transparent; transition: var(--transition); margin-bottom: -1px; }
+/* 激活状态的内部标签 */
 .tab-inner.active { color: var(--red); border-bottom-color: var(--red); }
 .tab-inner:hover { color: var(--text); }
-.tab-pane { display: none; }
-.tab-pane.active { display: block; }
+/* 标签面板 */
+.tab-pane { display: none; }              /* 默认隐藏 */
+.tab-pane.active { display: block; }      /* 激活时显示 */
 
+/* 申请说明提示条 */
 .apply-note { font-size: 12px; color: var(--text-muted); margin-top: 12px; padding: 10px 14px; background: var(--surface2); border-radius: 8px; border-left: 3px solid var(--amber); }
 
-/* ── ANIMATIONS ── */
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ── 动画关键帧 ── */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }              /* 淡入 */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } /* 从下往上淡入 */
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } } /* 上滑弹出 */
+@keyframes spin { to { transform: rotate(360deg); } }                      /* 旋转（加载动画） */
 
+/* 加载旋转器 */
 .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
 
-/* ── RESPONSIVE ── */
+/* ── 响应式布局（小屏幕适配） ── */
 @media (max-width: 768px) {
-  .login-card { width: 90%; max-width: 400px; padding: 40px 30px; }
-  .stat-grid { grid-template-columns: 1fr; }
-  .chart-row { grid-template-columns: 1fr; }
-  .form-grid { grid-template-columns: 1fr; }
-  .table-title { font-size: 14px; }
-  .nav-tab span.icon { display: none; }
-  .nav-tab { padding: 7px 12px; }
+  .login-card { width: 90%; max-width: 400px; padding: 40px 30px; } /* 登录卡片自适应 */
+  .stat-grid { grid-template-columns: 1fr; }       /* 统计卡片变为单列 */
+  .chart-row { grid-template-columns: 1fr; }        /* 图表变为单列 */
+  .form-grid { grid-template-columns: 1fr; }        /* 表单变为单列 */
+  .table-title { font-size: 14px; }                 /* 表格标题缩小 */
+  .nav-tab span.icon { display: none; }             /* 隐藏导航图标 */
+  .nav-tab { padding: 7px 12px; }                   /* 缩小导航标签间距 */
 }

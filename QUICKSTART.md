@@ -14,7 +14,7 @@ Open `http://localhost:5000`
 
 **Login with:**
 - Username: `admin`
-- Password: `huawei@123`
+- Password: (set via `DEFAULT_ADMIN_PASSWORD` in `.env`)
 
 ### Option 2: Docker (Recommended for Deployment)
 
@@ -90,7 +90,7 @@ pipeline-manager-deployed/
 | Field | Value |
 |-------|-------|
 | Username | admin |
-| Password | huawei@123 |
+| Password | Set via `DEFAULT_ADMIN_PASSWORD` in `.env` |
 | Role | Admin |
 
 ⚠️ **Change immediately** before going to production!
